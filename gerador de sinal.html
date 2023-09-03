@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Sinais Mines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            margin: 0;
+            background-image: url('https://cdn2.softswiss.net/b/spribe/mines.jpg');
+            position: relative;
+            overflow-x: hidden; /* Isso ocultará a rolagem horizontal */
+        }
+
+        .titulo {
+            font-size: 35px;
+            margin-bottom: 80px;
+            font-weight: bold;
+            color: rgb(30, 255, 0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .botao-container {
+            background-color: rgb(9, 187, 83);
+            padding: px;
+            border-radius: 2px;
+            display: inline-block;
+            margin-bottom: 40px; /* Aumentei a margem inferior para afastar o botão das estrelas e dos quadrados azuis */
+            margin-top: 40px; /* Ajustei a margem superior para abaixar o botão */
+        }
+
+        .botao {
+            background-color: transparent;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            transform-origin: center;
+            animation: buttonAnimation 1s ease infinite alternate, changeColor 0.5s ease;
+        }
+
+        @keyframes buttonAnimation {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes changeColor {
+            0%, 100% {
+                background-color: rgb(9, 187, 83);
+            }
+            50% {
+                background-color: rgb(255, 0, 0); /* Cor que o botão terá durante a animação */
+            }
+        }
+
+        /* Estilo para as cartas geradas */
+        .cartas {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 40px; /* Aumentei a margem superior para afastar as cartas das estrelas e dos quadrados azuis */
+            margin-bottom: 20px;
+        }
+
+        .carta {
+            width: 50px;
+            height: 50px;
+            border: 0px solid #ffffff;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        /* Estilo para a frase */
+        .frase {
+            margin-top: 40px; /* Aumentei a margem superior para afastar a frase das cartas */
+            font-size: 14px;
+            text-align: center;
+            font-weight: bold;
+            color: rgb(251, 255, 0);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+        }
+
+        /* Estilo para o link "Gerar Cartas" */
+        .gerar-link {
+            font-weight: bold;
+            color: rgb(0, 0, 0);
+        }
+
+        /* Estilo para o quadrado girando e o contador de segundos */
+        .loader-container {
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .quadrado-girando {
+            width: 50px;
+            height: 50px;
+            border: 4px solid transparent;
+            border-top: 8px solid rgb(255, 255, 255);
+            border-radius: 50%;
+            animation: girar 1s linear infinite;
+            display: none;
+            margin-top: 40px; /* Aumentei a margem superior para afastar os quadrados azuis das estrelas */
+        }
+
+        .contador-segundos {
+            font-size: 24px;
+            margin-top: 30px;
+            color: rgb(131, 204, 204);
+            font-weight: bold;
+            display: none;
+        }
+
+        @keyframes girar {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <audio id="som" src="https://api.flvto.site/pt/@download/74051-64f2b90e145a3-41886-5-64-file-41886/mp3/Q5OUHJ5nfMs/Green%2BScreen%2B%252B%2BEfeito%2BSonoro%2B%2528Acerto%2529.mp3/3b63586baab94fb74b2a4d1380a1f6c0d8465e8aea3855b072fb56f9b9e39467-1"></audio>
+    <img src="https://api5.iloveimg.com/v1/download/jp541tmcw51ddq8zt6bttwh2vts8z5n1gm3pc8c3w1Afg2kwlb3tz2tpt4n1tkw4ncb508bk4ljv1dpAAvy62tb27hsr1jwtzjyfl1ggA4nkz1qj779bn0bk455mxArr79A4jzfqz19hkkt9v4dvc4fmnAxry2hb85jgpvgl1xfv2hA1grh1" alt="Logo" class="logo">
+    <div class="botao-container">
+        <a href="#" class="botao" id="gerarBtn" onclick="animateButton(this)"><span class="gerar-link">Hackear Sinal</span></a>
+    </div>
+    <div class="cartas" id="cartasGeradas"></div>
+    <div class="quadrado-girando"></div>
+    <div class="contador-segundos"></div>
+    <div class="frase"></div>
+    <script>
+        function gerarCartas() {
+            const quadradoGirando = document.querySelector(".quadrado-girando");
+            const contadorSegundos = document.querySelector(".contador-segundos");
+            const cartasGeradas = document.getElementById("cartasGeradas");
+            cartasGeradas.style.display = "none";
+            quadradoGirando.style.display = "block";
+            contadorSegundos.style.display = "block";
+            let segundosRestantes = 5;
+            contadorSegundos.textContent = segundosRestantes;
+            const intervalo = setInterval(() => {
+                segundosRestantes--;
+                contadorSegundos.textContent = segundosRestantes;
+                if (segundosRestantes === 0) {
+                    clearInterval(intervalo);
+                    quadradoGirando.style.display = "none";
+                    contadorSegundos.style.display = "none";
+                    cartasGeradas.style.display = "flex";
+                    gerarCartasAleatórias();
+                }
+            }, 1000);
+        }
+
+        function gerarCartasAleatórias() {
+            const cartasGeradas = document.getElementById("cartasGeradas");
+            cartasGeradas.innerHTML = "";
+            const totalFileiras = 5;
+            const totalCartasPorFileira = 5;
+            const totalCartas = totalFileiras * totalCartasPorFileira;
+            const totalEstrelas = Math.floor(Math.random() * 2) + 4;
+            const totalCartasRestantes = totalCartas - totalEstrelas;
+            const emojiCarta = "🟦";
+            const todasAsEstrelas = Array(totalEstrelas).fill("⭐️");
+            const todasAsCartas = Array(totalCartasRestantes).fill(emojiCarta);
+            const todasAsCartasEstrelas = [...todasAsEstrelas, ...todasAsCartas];
+            for (let i = todasAsCartasEstrelas.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [todasAsCartasEstrelas[i], todasAsCartasEstrelas[j]] = [todasAsCartasEstrelas[j], todasAsCartasEstrelas[i]];
+            }
+            for (let i = 0; i < totalFileiras; i++) {
+                const fileira = document.createElement("div");
+                fileira.className = "cartas-fileira";
+                for (let j = 0; j < totalCartasPorFileira; j++) {
+                    const indice = i * totalCartasPorFileira + j;
+                    const elementoCarta = document.createElement("div");
+                    elementoCarta.className = "carta";
+                    elementoCarta.textContent = todasAsCartasEstrelas[indice];
+                    fileira.appendChild(elementoCarta);
+                }
+                cartasGeradas.appendChild(fileira);
+            }
+            const audio = document.getElementById("som");
+            audio.play();
+        }
+
+        function animateButton(button) {
+            button.style.transform = "translateY(-10px)";
+            setTimeout(function () {
+                button.style.transform = "translateY(0)";
+                gerarCartas();
+            }, 500);
+        }
+
+        document.getElementById("gerarBtn").addEventListener("click", function (event) {
+            event.preventDefault();
+            animateButton(this);
+        });
+
+        gerarCartas();
+    </script>
+</body>
+</html>
